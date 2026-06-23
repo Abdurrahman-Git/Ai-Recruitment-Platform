@@ -178,9 +178,7 @@ pytest tests/ -v
 
 ---
 
-## 🔧 Production Improvements (for interviews)
-
-When asked about scaling/production, mention:
+## 🔧 Production Improvements
 
 1. **Async LLM calls**: Use `asyncio` + `httpx` to call LLM for multiple candidates in parallel (10x speed improvement for bulk matching)
 2. **Caching**: Redis to cache analysis results — don't re-analyze the same resume
