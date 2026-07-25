@@ -4,6 +4,12 @@
 
 ---
 
+## 🌐 Live Demo
+- **Dashboard:** https://ai-recruitment-platform-obc0.onrender.com/ui
+- **API Docs:** https://ai-recruitment-platform-obc0.onrender.com/docs
+
+---
+
 ## 🏗️ Architecture
 
 ```
