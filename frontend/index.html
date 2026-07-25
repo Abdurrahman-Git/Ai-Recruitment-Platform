@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RecruitIQ — AI Recruitment Platform</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --ink:       #0f1117;
+  --ink-2:     #3a3f50;
+  --ink-3:     #6b7280;
+  --paper:     #f5f6fa;
+  --surface:   #ffffff;
+  --border:    #e4e7ed;
+  --border-2:  #d0d4dd;
+  --ai:        #5b4cf5;
+  --ai-light:  #ede9ff;
+  --ai-dark:   #3d31cc;
+  --green:     #16a34a;
+  --green-bg:  #f0fdf4;
+  --amber:     #d97706;
+  --amber-bg:  #fffbeb;
+  --red:       #dc2626;
+  --red-bg:    #fef2f2;
+  --blue:      #2563eb;
+  --blue-bg:   #eff6ff;
+  --radius:    10px;
+  --shadow:    0 1px 3px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.10), 0 4px 10px rgba(0,0,0,.05);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+input,textarea,select{font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ── Layout ── */
+.app{display:flex;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{width:230px;flex-shrink:0;background:var(--ink);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.10)}
+.logo-mark{display:flex;align-items:center;gap:9px}
+.logo-icon{width:32px;height:32px;background:var(--ai);border-radius:8px;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.logo-text{font-size:.95rem;font-weight:700;letter-spacing:-.2px}
+.logo-sub{font-size:.72rem;color:rgba(255,255,255,.45);margin-top:1px}
+.sidebar-nav{flex:1;padding:12px 0}
+.nav-label{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:14px 18px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:.875rem;color:rgba(255,255,255,.65);border-radius:0;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.07)}
+.nav-item.active{color:#fff;background:rgba(91,76,245,.25);border-left-color:var(--ai)}
+.nav-item .ni{font-size:1rem;width:20px;text-align:center}
+.sidebar-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:.78rem;color:rgba(255,255,255,.35)}
+#api-status-dot{width:8px;height:8px;border-radius:50%;background:#6b7280;display:inline-block;margin-right:6px;transition:background .3s}
+#api-status-dot.online{background:var(--green)}
+#api-status-dot.offline{background:var(--red)}
+
+/* ── Main content ── */
+.main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:12px;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:1rem;font-weight:600;flex:1}
+.topbar-badge{font-size:.75rem;background:var(--ai-light);color:var(--ai);padding:3px 10px;border-radius:99px;font-weight:600}
+.content{flex:1;padding:28px;max-width:1200px}
+
+/* ── Pages ── */
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-header-text h1{font-size:1.25rem;font-weight:700;letter-spacing:-.3px}
+.page-header-text p{font-size:.875rem;color:var(--ink-3);margin-top:3px}
+.page-actions{display:flex;gap:8px;flex-shrink:0}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-title{font-size:.9rem;font-weight:600}
+.card-body{padding:20px}
+
+/* ── Stats grid ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.stat-card.ai{border-color:rgba(91,76,245,.3);background:rgba(91,76,245,.03)}
+.stat-label{font-size:.78rem;color:var(--ink-3);font-weight:500;margin-bottom:6px}
+.stat-value{font-size:1.8rem;font-weight:700;letter-spacing:-.5px}
+.stat-sub{font-size:.75rem;color:var(--ink-3);margin-top:4px}
+
+/* ── Grid helpers ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:.875rem;font-weight:500;border:none;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--ai);color:#fff}
+.btn-primary:hover{background:var(--ai-dark)}
+.btn-secondary{background:var(--surface);color:var(--ink-2);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--border-2);background:var(--paper)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
+.btn-danger:hover{background:#fee2e2}
+.btn-ghost{background:transparent;color:var(--ink-3);padding:6px 10px}
+.btn-ghost:hover{color:var(--ink);background:var(--paper)}
+.btn-sm{padding:5px 12px;font-size:.8rem}
+.btn-icon{padding:7px;border-radius:7px;background:var(--paper);border:1px solid var(--border);color:var(--ink-3)}
+.btn-icon:hover{color:var(--ai);border-color:var(--ai)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* ── AI badge ── */
+.ai-badge{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;background:var(--ai-light);color:var(--ai);padding:2px 8px;border-radius:99px}
+
+/* ── Forms ── */
+.form-group{margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+label{font-size:.82rem;font-weight:500;color:var(--ink-2);display:block;margin-bottom:5px}
+.form-control{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:.875rem;color:var(--ink);background:var(--surface);transition:border .15s}
+.form-control:focus{outline:none;border-color:var(--ai);box-shadow:0 0 0 3px rgba(91,76,245,.1)}
+textarea.form-control{resize:vertical;min-height:80px}
+.form-hint{font-size:.75rem;color:var(--ink-3);margin-top:4px}
+
+/* ── Tags ── */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:.75rem;padding:3px 9px;border-radius:99px;font-weight:500}
+.tag-blue{background:var(--blue-bg);color:var(--blue)}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-amber{background:var(--amber-bg);color:var(--amber)}
+.tag-red{background:var(--red-bg);color:var(--red)}
+.tag-ai{background:var(--ai-light);color:var(--ai)}
+.tag-gray{background:var(--paper);color:var(--ink-3);border:1px solid var(--border)}
+
+/* ── Tables ── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.875rem;background:var(--surface)}
+thead{background:var(--paper)}
+th{padding:11px 14px;text-align:left;font-size:.78rem;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(91,76,245,.02)}
+.td-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* ── Score badges ── */
+.score-badge{display:inline-flex;align-items:center;justify-content:center;width:44px;height:24px;border-radius:6px;font-size:.78rem;font-weight:700}
+.score-high{background:var(--green-bg);color:var(--green)}
+.score-mid{background:var(--amber-bg);color:var(--amber)}
+.score-low{background:var(--red-bg);color:var(--red)}
+
+/* ── Progress bars ── */
+.progress{height:6px;background:var(--paper);border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;background:var(--ai);transition:width .5s ease}
+.progress-bar.green{background:var(--green)}
+.progress-bar.amber{background:var(--amber)}
+
+/* ── Modals ── */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column}
+.modal-lg{max-width:720px}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:1rem;font-weight:700}
+.modal-body{padding:24px;overflow-y:auto;flex:1}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.btn-close{background:none;border:none;font-size:1.2rem;color:var(--ink-3);padding:4px;cursor:pointer;border-radius:6px}
+.btn-close:hover{color:var(--ink);background:var(--paper)}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:22px}
+.tab{padding:9px 16px;font-size:.875rem;font-weight:500;color:var(--ink-3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:6px 6px 0 0;transition:all .15s}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--ai);border-bottom-color:var(--ai);background:rgba(91,76,245,.04)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Spinner / overlay ── */
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.spinner-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--ai);border-radius:50%;animation:spin .8s linear infinite}
+.spinner-msg{font-size:.875rem;color:var(--ink-2);font-weight:500}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toast notifications ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:400;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:10px;font-size:.875rem;font-weight:500;box-shadow:var(--shadow-lg);animation:slideUp .3s ease;display:flex;align-items:center;gap:8px;min-width:260px;max-width:380px;background:var(--ink);color:#fff}
+.toast.success{background:#15803d}
+.toast.error{background:var(--red)}
+.toast.warning{background:var(--amber)}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── Empty states ── */
+.empty-state{text-align:center;padding:52px 20px;color:var(--ink-3)}
+.empty-icon{font-size:2.5rem;margin-bottom:12px}
+.empty-state h3{font-size:.95rem;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.empty-state p{font-size:.85rem}
+
+/* ── Result panels ── */
+.result-panel{background:var(--ai-light);border:1px solid rgba(91,76,245,.2);border-radius:var(--radius);padding:20px;margin-top:20px}
+.result-panel-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(91,76,245,.2)}
+.result-panel-title{font-size:.95rem;font-weight:700;color:var(--ai)}
+
+/* ── Skill gap bar ── */
+.skill-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.skill-name{font-size:.82rem;color:var(--ink-2);width:130px;flex-shrink:0}
+.skill-status{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+
+/* ── Rank cards ── */
+.rank-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.rank-num{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.rank-1{background:#fef9c3;color:#854d0e}
+.rank-2{background:#f1f5f9;color:#475569}
+.rank-3{background:#fef3c7;color:#92400e}
+.rank-other{background:var(--paper);color:var(--ink-3)}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:.9rem;font-weight:600}
+.rank-email{font-size:.78rem;color:var(--ink-3)}
+
+/* ── Screening questions ── */
+.question-item{display:flex;gap:12px;margin-bottom:14px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.question-num{width:24px;height:24px;border-radius:50%;background:var(--ai-light);color:var(--ai);font-size:.75rem;font-weight:700;display:grid;place-items:center;flex-shrink:0;margin-top:1px}
+.question-text{font-size:.875rem;color:var(--ink)}
+
+/* ── Candidate profile view ── */
+.profile-hero{background:linear-gradient(135deg,var(--ai) 0%,var(--ai-dark) 100%);border-radius:var(--radius);padding:24px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:18px}
+.profile-avatar{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:1.3rem;font-weight:700;flex-shrink:0;border:2px solid rgba(255,255,255,.3)}
+.profile-name{font-size:1.15rem;font-weight:700}
+.profile-meta{font-size:.82rem;opacity:.8;margin-top:3px}
+.profile-score-ring{text-align:center;margin-left:auto;flex-shrink:0}
+.profile-score-num{font-size:2rem;font-weight:700;line-height:1}
+.profile-score-label{font-size:.72rem;opacity:.7;margin-top:2px}
+
+/* ── JD result ── */
+.jd-output{background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:18px;font-size:.875rem;line-height:1.7;white-space:pre-wrap;max-height:400px;overflow-y:auto;color:var(--ink-2)}
+
+/* ── Misc ── */
+.divider{height:1px;background:var(--border);margin:20px 0}
+.text-ai{color:var(--ai);font-weight:600}
+.text-muted{color:var(--ink-3)}
+.fw-600{font-weight:600}
+.mt-12{margin-top:12px}
+.mb-16{margin-bottom:16px}
+.gap-list > * + *{margin-top:8px}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .sidebar{width:200px}
+  .main{margin-left:200px}
+}
+@media(max-width:640px){
+  .sidebar{transform:translateX(-100%);transition:transform .2s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .stats-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══════════════════════════════════════════════════════ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">🤖</div>
+      <div>
+        <div class="logo-text">RecruitIQ</div>
+        <div class="logo-sub">AI Recruitment Platform</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" onclick="navigate('dashboard')"><span class="ni">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="navigate('analytics')"><span class="ni">📈</span> Analytics</div>
+
+    <div class="nav-label">Candidates</div>
+    <div class="nav-item" onclick="navigate('candidates')"><span class="ni">👥</span> All Candidates</div>
+    <div class="nav-item" onclick="navigate('analyze')"><span class="ni">🔍</span> Analyze Resume</div>
+
+    <div class="nav-label">Jobs</div>
+    <div class="nav-item" onclick="navigate('jobs')"><span class="ni">💼</span> All Jobs</div>
+    <div class="nav-item" onclick="navigate('generate-jd')"><span class="ni">✨</span> Generate JD</div>
+
+    <div class="nav-label">AI Tools</div>
+    <div class="nav-item" onclick="navigate('match')"><span class="ni">🎯</span> Job Matching</div>
+    <div class="nav-item" onclick="navigate('screening')"><span class="ni">❓</span> Screening Qs</div>
+
+    <div class="nav-label">System</div>
+    <div class="nav-item" onclick="navigate('settings')"><span class="ni">⚙️</span> Settings</div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <span id="api-status-dot"></span>
+    <span id="api-status-text">Checking API…</span>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════ MAIN AREA ═══ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <span class="topbar-badge">⚡ Gemini AI</span>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══════════════════════════════════════════ PAGE: DASHBOARD ═══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Dashboard</h1>
+          <p>Your recruitment overview at a glance</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary btn-sm" onclick="loadDashboard()">↺ Refresh</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-candidate')">+ Add Candidate</button>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="dash-stats">
+        <div class="stat-card"><div class="stat-label">Total Candidates</div><div class="stat-value" id="d-candidates">—</div><div class="stat-sub">in database</div></div>
+        <div class="stat-card"><div class="stat-label">Active Jobs</div><div class="stat-value" id="d-jobs">—</div><div class="stat-sub">open positions</div></div>
+        <div class="stat-card ai"><div class="stat-label">AI Matches Run</div><div class="stat-value" id="d-matches">—</div><div class="stat-sub">total analyses</div></div>
+        <div class="stat-card ai"><div class="stat-label">Avg Match Score</div><div class="stat-value" id="d-avg">—</div><div class="stat-sub">across all matches</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">🔥 Most In-Demand Skills</span></div>
+          <div class="card-body" id="d-demand-skills"><div class="text-muted" style="font-size:.875rem">Loading…</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">💡 Top Candidate Skills</span></div>
+          <div class="card-body" id="d-candidate-skills"><div class="text-muted" style="font-size:.875rem">Loading…</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚡ Quick Actions</span>
+        </div>
+        <div class="card-body" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <button class="btn btn-secondary" style="flex-direction:column;height:80px;gap:6px" onclick="openModal('modal-add-candidate')">
+            <span style="font-size:1.4rem">👤</span><span style="font-size:.78rem">Add Candidate</span>
+          </button>
+          <button class="btn btn-secondary" style="flex-direction:column;height:80px;gap:6px" onclick="openModal('modal-add-job')">
+            <span style="font-size:1.4rem">💼</span><span style="font-size:.78rem">Add Job</span>
+          </button>
+          <button class="btn btn-secondary" style="flex-direction:column;height:80px;gap:6px" onclick="navigate('generate-jd')">
+            <span style="font-size:1.4rem">✨</span><span style="font-size:.78rem">Generate JD</span>
+          </button>
+          <button class="btn btn-secondary" style="flex-direction:column;height:80px;gap:6px" onclick="navigate('match')">
+            <span style="font-size:1.4rem">🎯</span><span style="font-size:.78rem">Match Candidates</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ PAGE: CANDIDATES ═══ -->
+    <div class="page" id="page-candidates">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Candidates</h1>
+          <p>Manage and review all candidate profiles</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary btn-sm" onclick="exportCandidatesCSV()">⬇ Export CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-candidate')">+ Add Candidate</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-body" style="padding:14px 20px">
+          <input class="form-control" id="candidate-search" placeholder="🔍  Search by name or email…" oninput="filterCandidates()" style="max-width:360px"/>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Experience</th>
+              <th>Skills</th>
+              <th>AI Score</th>
+              <th>Added</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="candidates-tbody">
+            <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><h3>No candidates yet</h3><p>Click "Add Candidate" to get started</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════ PAGE: ANALYZE RESUME ═══ -->
+    <div class="page" id="page-analyze">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Analyze Resume</h1>
+          <p>AI extracts skills, scores the candidate, and generates a professional summary</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:start">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Select Candidate</span>
+            <span class="ai-badge">✨ AI Powered</span>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Candidate</label>
+              <select class="form-control" id="analyze-candidate-select" onchange="onAnalyzeSelect()">
+                <option value="">— Select a candidate —</option>
+              </select>
+            </div>
+            <div id="analyze-preview" style="display:none;padding:14px;background:var(--paper);border-radius:8px;font-size:.82rem;color:var(--ink-2);line-height:1.6;max-height:220px;overflow-y:auto;border:1px solid var(--border)"></div>
+            <div style="margin-top:16px;display:flex;gap:8px">
+              <button class="btn btn-primary" id="btn-run-analysis" onclick="runAnalysis()" disabled>✨ Analyze with AI</button>
+              <button class="btn btn-secondary" id="btn-reanalyze" onclick="runReanalysis()" disabled>↺ Re-analyze</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="analysis-result" style="display:none">
+          <div class="profile-hero" id="analysis-hero">
+            <div class="profile-avatar" id="ah-avatar"></div>
+            <div>
+              <div class="profile-name" id="ah-name"></div>
+              <div class="profile-meta" id="ah-meta"></div>
+              <div style="margin-top:8px" id="ah-badge"></div>
+            </div>
+            <div class="profile-score-ring">
+              <div class="profile-score-num" id="ah-score"></div>
+              <div class="profile-score-label">AI Score</div>
+            </div>
+          </div>
+
+          <div class="card mb-16">
+            <div class="card-header"><span class="card-title">📋 Summary</span></div>
+            <div class="card-body">
+              <p style="font-size:.875rem;line-height:1.7;color:var(--ink-2)" id="analysis-summary"></p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><span class="card-title">✅ Strengths</span></div>
+              <div class="card-body gap-list" id="analysis-strengths"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">📈 Growth Areas</span></div>
+              <div class="card-body gap-list" id="analysis-growth"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-header"><span class="card-title">🔧 Skills Extracted</span></div>
+            <div class="card-body">
+              <div class="tags" id="analysis-skills"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ PAGE: JOBS ═══ -->
+    <div class="page" id="page-jobs">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Job Postings</h1>
+          <p>Manage all open positions</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary btn-sm" onclick="navigate('generate-jd')">✨ Generate with AI</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-job')">+ Add Job</button>
+        </div>
+      </div>
+
+      <div id="jobs-grid">
+        <div class="empty-state"><div class="empty-icon">💼</div><h3>No jobs yet</h3><p>Add a job posting or generate one with AI</p></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════ PAGE: GENERATE JD ═══ -->
+    <div class="page" id="page-generate-jd">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Generate Job Description</h1>
+          <p>Fill in the basics — AI writes a complete professional JD in seconds</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:start">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Job Details</span><span class="ai-badge">✨ AI Writes the Rest</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group" style="margin:0">
+                <label>Job Title *</label>
+                <input class="form-control" id="jd-title" placeholder="e.g. Senior Python Developer"/>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Company Name *</label>
+                <input class="form-control" id="jd-company" placeholder="e.g. TechCorp"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Required Skills * <span class="form-hint" style="display:inline">(comma-separated)</span></label>
+              <input class="form-control" id="jd-skills" placeholder="Python, FastAPI, SQL, Docker"/>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="margin:0">
+                <label>Min. Experience (years)</label>
+                <input class="form-control" id="jd-exp" type="number" min="0" max="30" value="3"/>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Location</label>
+                <input class="form-control" id="jd-location" placeholder="Colombo / Remote"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="jd-remote" style="width:auto"/>
+                Remote position
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Additional Context <span class="form-hint" style="display:inline">(optional)</span></label>
+              <input class="form-control" id="jd-context" placeholder="e.g. startup environment, AI product team"/>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" onclick="generateJD()">✨ Generate JD</button>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;color:var(--ink-2);margin:0">
+                <input type="checkbox" id="jd-save" checked style="width:auto"/> Save as job posting
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="jd-result-panel" style="display:none">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">✨ Generated Job Description</span>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-secondary btn-sm" onclick="copyJD()">📋 Copy</button>
+                <button class="btn btn-secondary btn-sm" onclick="downloadJD()">⬇ Download</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="jd-output" id="jd-output"></div>
+              <div id="jd-saved-note" style="display:none;margin-top:12px" class="ai-badge">✅ Saved as Job Posting #<span id="jd-saved-id"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ PAGE: MATCHING ═══ -->
+    <div class="page" id="page-match">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Job Matching</h1>
+          <p>AI scores candidate fit and ranks applicants for any position</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchMatchTab('rank', this)">🏆 Rank All Candidates</button>
+        <button class="tab" onclick="switchMatchTab('one', this)">🎯 Match One Candidate</button>
+      </div>
+
+      <!-- Rank tab -->
+      <div class="tab-panel active" id="match-tab-rank">
+        <div class="card mb-16">
+          <div class="card-header"><span class="card-title">Select Job to Rank For</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group" style="margin:0">
+                <label>Job Posting</label>
+                <select class="form-control" id="rank-job-select">
+                  <option value="">— Select a job —</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Top N Results</label>
+                <select class="form-control" id="rank-top-n">
+                  <option value="5">Top 5</option>
+                  <option value="10" selected>Top 10</option>
+                  <option value="20">Top 20</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="rankCandidates()">🏆 Rank All Candidates</button>
+          </div>
+        </div>
+        <div id="rank-results"></div>
+      </div>
+
+      <!-- One-to-one match tab -->
+      <div class="tab-panel" id="match-tab-one">
+        <div class="card mb-16">
+          <div class="card-header"><span class="card-title">Match Specific Candidate</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group" style="margin:0">
+                <label>Candidate</label>
+                <select class="form-control" id="match-candidate-select">
+                  <option value="">— Select candidate —</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Job Posting</label>
+                <select class="form-control" id="match-job-select">
+                  <option value="">— Select job —</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="matchOne()">🎯 Match Now</button>
+          </div>
+        </div>
+        <div id="one-match-result"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ PAGE: SCREENING ═══ -->
+    <div class="page" id="page-screening">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Screening Questions</h1>
+          <p>AI generates personalized interview questions tailored to the candidate + role</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="align-items:start">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Generate Questions</span><span class="ai-badge">✨ Personalized</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Candidate</label>
+              <select class="form-control" id="screen-candidate-select">
+                <option value="">— Select candidate —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Job Posting</label>
+              <select class="form-control" id="screen-job-select">
+                <option value="">— Select job —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Number of Questions</label>
+              <select class="form-control" id="screen-num">
+                <option value="3">3 questions</option>
+                <option value="5" selected>5 questions</option>
+                <option value="8">8 questions</option>
+                <option value="10">10 questions</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="generateScreening()">✨ Generate Questions</button>
+          </div>
+        </div>
+
+        <div id="screening-result" style="display:none">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title" id="screening-title">Interview Questions</span>
+              <button class="btn btn-secondary btn-sm" onclick="copyScreening()">📋 Copy All</button>
+            </div>
+            <div class="card-body">
+              <div id="screening-focus-areas" style="margin-bottom:14px"></div>
+              <div id="screening-questions-list"></div>
+              <div id="screening-tips" style="margin-top:14px;padding:12px;background:var(--amber-bg);border-radius:8px;font-size:.82rem;color:var(--amber)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════ PAGE: ANALYTICS ═══ -->
+    <div class="page" id="page-analytics">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Analytics</h1>
+          <p>Platform-wide recruitment insights</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="loadAnalytics()">↺ Refresh</button>
+      </div>
+      <div id="analytics-body">
+        <div class="empty-state"><div class="empty-icon">📈</div><p>Loading analytics…</p></div>
+      </div>
+    </div>
+
+    <!-- ═════════════════════════════════════════ PAGE: SETTINGS ═══ -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Settings</h1>
+          <p>Configure API connection</p>
+        </div>
+      </div>
+      <div class="card" style="max-width:520px">
+        <div class="card-header"><span class="card-title">API Configuration</span></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Backend API URL</label>
+            <input class="form-control" id="setting-api-url" value="http://localhost:8000"/>
+            <div class="form-hint">Your FastAPI server address. Default: http://localhost:8000</div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save & Test Connection</button>
+          <div id="settings-status" style="margin-top:14px;font-size:.85rem"></div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width:520px;margin-top:16px">
+        <div class="card-header"><span class="card-title">About</span></div>
+        <div class="card-body" style="font-size:.875rem;color:var(--ink-2);line-height:1.8">
+          <p><strong>RecruitIQ</strong> — AI Recruitment Intelligence Platform</p>
+          <p>Backend: FastAPI + SQLAlchemy + Google Gemini</p>
+          <p>Frontend: Vanilla HTML/CSS/JS (no build tools needed)</p>
+          <p style="margin-top:10px;color:var(--ink-3);font-size:.8rem">Portfolio Project · Built with 🤖 Google Gemini</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══════════════════════════════════════════════ MODALS ═══ -->
+
+<!-- Add Candidate -->
+<div class="modal-backdrop" id="modal-add-candidate">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add New Candidate</span>
+      <button class="btn-close" onclick="closeModal('modal-add-candidate')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" style="margin:0">
+          <label>Full Name *</label>
+          <input class="form-control" id="c-name" placeholder="e.g. Priya Sharma"/>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Email *</label>
+          <input class="form-control" id="c-email" type="email" placeholder="priya@example.com"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input class="form-control" id="c-phone" placeholder="+94 77 123 4567"/>
+      </div>
+      <div class="form-group">
+        <label>Resume Text *</label>
+        <textarea class="form-control" id="c-resume" rows="8" placeholder="Paste the full resume text here…
+
+Example:
+Jane Smith — Senior Software Engineer
+5 years experience at TechCorp building Python microservices.
+Skills: Python, FastAPI, PostgreSQL, Docker, AWS
+Education: B.Sc. Computer Science, University of Colombo 2019"></textarea>
+        <div class="form-hint">Plain text is fine. The AI will extract skills and score the candidate automatically.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-candidate')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCandidate()">Save Candidate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Job -->
+<div class="modal-backdrop" id="modal-add-job">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add Job Posting</span>
+      <button class="btn-close" onclick="closeModal('modal-add-job')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" style="margin:0">
+          <label>Job Title *</label>
+          <input class="form-control" id="j-title" placeholder="e.g. Senior Python Developer"/>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Company *</label>
+          <input class="form-control" id="j-company" placeholder="e.g. TechCorp"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Required Skills <span class="form-hint" style="display:inline">(comma-separated)</span></label>
+        <input class="form-control" id="j-skills" placeholder="Python, FastAPI, SQL, Docker"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin:0">
+          <label>Min. Experience (years)</label>
+          <input class="form-control" id="j-exp" type="number" min="0" value="3"/>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Location</label>
+          <input class="form-control" id="j-location" placeholder="Colombo / Remote"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="j-remote" style="width:auto"/> Remote position
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Job Description *</label>
+        <textarea class="form-control" id="j-desc" rows="6" placeholder="Full job description text…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-job')">Cancel</button>
+      <button class="btn btn-primary" onclick="addJob()">Save Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- Candidate Detail -->
+<div class="modal-backdrop" id="modal-candidate-detail">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="detail-modal-title">Candidate Profile</span>
+      <button class="btn-close" onclick="closeModal('modal-candidate-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="detail-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-candidate-detail')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete -->
+<div class="modal-backdrop" id="modal-confirm-delete">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <span class="modal-title">Confirm Delete</span>
+      <button class="btn-close" onclick="closeModal('modal-confirm-delete')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.9rem;color:var(--ink-2)">Are you sure you want to delete <strong id="delete-name"></strong>? This cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-confirm-delete')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Spinner -->
+<div class="spinner-overlay" id="spinner">
+  <div class="spinner"></div>
+  <div class="spinner-msg" id="spinner-msg">Working…</div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════ JAVASCRIPT ═══ -->
+<script>
+/* ════════════════════════════════════════════════════════════ STATE ═══ */
+let API = localStorage.getItem('api_url') || 'http://localhost:8000';
+let _candidates = [];
+let _jobs = [];
+let _deleteTarget = null;  // {type, id, name}
+
+/* ════════════════════════════════════════════════════════════ BOOT ═══ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('setting-api-url').value = API;
+  checkAPI();
+  loadDashboard();
+});
+
+/* ═══════════════════════════════════════════════════ NAVIGATION ═══ */
+const PAGE_TITLES = {
+  dashboard:'Dashboard', candidates:'Candidates', analyze:'Analyze Resume',
+  jobs:'Job Postings', 'generate-jd':'Generate JD', match:'Job Matching',
+  screening:'Screening Questions', analytics:'Analytics', settings:'Settings'
+};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+page+"'"))
+      n.classList.add('active');
+  });
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[page] || page;
+  if (page === 'candidates') loadCandidates();
+  if (page === 'jobs') loadJobs();
+  if (page === 'analyze') populateAnalyzeSelect();
+  if (page === 'match') populateMatchSelects();
+  if (page === 'screening') populateScreeningSelects();
+  if (page === 'analytics') loadAnalytics();
+}
+
+/* ═══════════════════════════════════════════════════ API HELPER ═══ */
+async function api(method, path, body) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({detail: res.statusText}));
+    throw new Error(err.detail || 'API error ' + res.status);
+  }
+  return res.json();
+}
+
+async function checkAPI() {
+  const dot = document.getElementById('api-status-dot');
+  const txt = document.getElementById('api-status-text');
+  try {
+    await fetch(API + '/');
+    dot.className = 'online'; txt.textContent = 'API connected';
+  } catch {
+    dot.className = 'offline'; txt.textContent = 'API offline';
+  }
+}
+
+/* ════════════════════════════════════════════════════ UI UTILS ═══ */
+function showSpinner(msg='Working…') {
+  document.getElementById('spinner-msg').textContent = msg;
+  document.getElementById('spinner').classList.add('show');
+}
+function hideSpinner() { document.getElementById('spinner').classList.remove('show'); }
+
+function toast(msg, type='') {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3800);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function scoreClass(s) {
+  if (s >= 75) return 'score-high';
+  if (s >= 50) return 'score-mid';
+  return 'score-low';
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+}
+
+function initials(name) {
+  return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+/* ═══════════════════════════════════════════════════ DASHBOARD ═══ */
+async function loadDashboard() {
+  try {
+    const a = await api('GET', '/api/v1/analytics/summary');
+    document.getElementById('d-candidates').textContent = a.total_candidates;
+    document.getElementById('d-jobs').textContent = a.total_jobs;
+    document.getElementById('d-matches').textContent = a.total_matches;
+    document.getElementById('d-avg').textContent = a.avg_match_score ? Math.round(a.avg_match_score) + '%' : '—';
+    renderSkillBars('d-demand-skills', a.top_skills_in_demand, 'var(--ai)');
+    renderSkillBars('d-candidate-skills', a.top_candidate_skills, 'var(--green)');
+  } catch(e) {
+    toast('Could not load dashboard. Is the API running?', 'error');
+  }
+}
+
+function renderSkillBars(elId, skills, color) {
+  const el = document.getElementById(elId);
+  if (!skills || !skills.length) {
+    el.innerHTML = '<div class="text-muted" style="font-size:.875rem">No data yet — add candidates and jobs first.</div>';
+    return;
+  }
+  el.innerHTML = skills.slice(0,8).map((s,i) => `
+    <div class="skill-row">
+      <span class="skill-name">${s}</span>
+      <div class="progress" style="flex:1"><div class="progress-bar" style="width:${Math.max(20,100-i*11)}%;background:${color}"></div></div>
+      <span style="font-size:.75rem;color:var(--ink-3);width:30px;text-align:right">#${i+1}</span>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════ CANDIDATES ═══ */
+async function loadCandidates() {
+  try {
+    _candidates = await api('GET', '/api/v1/candidates/?limit=200');
+    renderCandidates(_candidates);
+  } catch(e) { toast('Failed to load candidates: ' + e.message, 'error'); }
+}
+
+function filterCandidates() {
+  const q = document.getElementById('candidate-search').value.toLowerCase();
+  const filtered = _candidates.filter(c =>
+    c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
+  );
+  renderCandidates(filtered);
+}
+
+function renderCandidates(list) {
+  const tbody = document.getElementById('candidates-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><h3>No candidates found</h3><p>Add a candidate to get started</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(c => {
+    const skills = c.skills ? c.skills.split(',').slice(0,3).map(s=>`<span class="tag tag-blue">${s.trim()}</span>`).join('') : '—';
+    const score = c.ai_summary ? `<span class="score-badge ${scoreClass(c.years_experience*10||50)}">${c.years_experience ? c.years_experience+'y' : '—'}</span>` : '<span class="text-muted" style="font-size:.78rem">Not analyzed</span>';
+    return `<tr>
+      <td><span class="fw-600">${c.name}</span></td>
+      <td><span style="color:var(--ink-3)">${c.email}</span></td>
+      <td>${c.years_experience != null ? c.years_experience + ' yrs' : '—'}</td>
+      <td><div class="tags" style="margin:0">${skills}</div></td>
+      <td>${c.ai_summary ? '<span class="ai-badge">✓ Analyzed</span>' : '<span class="text-muted" style="font-size:.78rem">Pending</span>'}</td>
+      <td style="color:var(--ink-3)">${fmtDate(c.created_at)}</td>
+      <td><div class="td-actions">
+        <button class="btn-icon" title="View profile" onclick="viewCandidate(${c.id})">👁</button>
+        <button class="btn-icon" title="Analyze resume" onclick="analyzeFromTable(${c.id})">🔍</button>
+        <button class="btn-icon" title="Delete" onclick="promptDelete('candidate',${c.id},'${c.name.replace(/'/g,"\\'")}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function addCandidate() {
+  const name = document.getElementById('c-name').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const phone = document.getElementById('c-phone').value.trim();
+  const resume = document.getElementById('c-resume').value.trim();
+  if (!name || !email || !resume) { toast('Name, email and resume are required', 'error'); return; }
+  try {
+    showSpinner('Saving candidate…');
+    await api('POST', '/api/v1/candidates/', {name, email, phone: phone||null, resume_text: resume});
+    closeModal('modal-add-candidate');
+    toast('Candidate added!', 'success');
+    ['c-name','c-email','c-phone','c-resume'].forEach(id => document.getElementById(id).value = '');
+    loadCandidates();
+    loadDashboard();
+  } catch(e) { toast(e.message, 'error'); }
+  finally { hideSpinner(); }
+}
+
+function viewCandidate(id) {
+  const c = _candidates.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('detail-modal-title').textContent = c.name;
+  document.getElementById('detail-modal-body').innerHTML = `
+    <div class="profile-hero" style="margin-bottom:20px">
+      <div class="profile-avatar">${initials(c.name)}</div>
+      <div>
+        <div class="profile-name">${c.name}</div>
+        <div class="profile-meta">${c.email}${c.phone ? ' · ' + c.phone : ''}</div>
+        <div style="margin-top:8px">
+          ${c.years_experience != null ? `<span class="tag tag-blue">${c.years_experience} years exp</span>` : ''}
+        </div>
+      </div>
+    </div>
+    ${c.ai_summary ? `
+    <div style="margin-bottom:16px">
+      <div style="font-size:.78rem;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">AI Summary</div>
+      <p style="font-size:.875rem;line-height:1.7;color:var(--ink-2)">${c.ai_summary}</p>
+    </div>` : ''}
+    ${c.skills ? `
+    <div style="margin-bottom:16px">
+      <div style="font-size:.78rem;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Skills</div>
+      <div class="tags">${c.skills.split(',').map(s=>`<span class="tag tag-blue">${s.trim()}</span>`).join('')}</div>
+    </div>` : ''}
+    ${c.resume_text ? `
+    <div>
+      <div style="font-size:.78rem;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Resume Text</div>
+      <div style="background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:.8rem;line-height:1.7;max-height:200px;overflow-y:auto;white-space:pre-wrap;color:var(--ink-2)">${c.resume_text}</div>
+    </div>` : ''}`;
+  openModal('modal-candidate-detail');
+}
+
+function analyzeFromTable(id) {
+  navigate('analyze');
+  setTimeout(() => {
+    document.getElementById('analyze-candidate-select').value = id;
+    onAnalyzeSelect();
+  }, 100);
+}
+
+function exportCandidatesCSV() {
+  if (!_candidates.length) { toast('No candidates to export', 'warning'); return; }
+  const cols = ['id','name','email','phone','years_experience','skills','created_at'];
+  const rows = [cols.join(',')];
+  _candidates.forEach(c => {
+    rows.push(cols.map(col => {
+      const v = c[col] || '';
+      return `"${String(v).replace(/"/g,'""')}"`;
+    }).join(','));
+  });
+  const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'candidates-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  toast('CSV downloaded!', 'success');
+}
+
+/* ══════════════════════════════════════════ DELETE CONFIRMATION ═══ */
+function promptDelete(type, id, name) {
+  _deleteTarget = {type, id, name};
+  document.getElementById('delete-name').textContent = name;
+  openModal('modal-confirm-delete');
+}
+
+async function confirmDelete() {
+  if (!_deleteTarget) return;
+  const {type, id} = _deleteTarget;
+  try {
+    showSpinner('Deleting…');
+    // For candidates we soft-delete by marking inactive via our own workaround
+    // The backend doesn't have a DELETE /candidates/{id} endpoint so we note this
+    // In production you'd add it; for now we remove from local list and show a message
+    if (type === 'candidate') {
+      // Remove from local state (backend endpoint to add: DELETE /api/v1/candidates/{id})
+      _candidates = _candidates.filter(c => c.id !== id);
+      renderCandidates(_candidates);
+      toast('Candidate removed from view (add DELETE endpoint to persist)', 'warning');
+    } else if (type === 'job') {
+      await api('PATCH', `/api/v1/jobs/${id}/deactivate`);
+      toast('Job deactivated!', 'success');
+      loadJobs();
+      loadDashboard();
+    }
+    closeModal('modal-confirm-delete');
+  } catch(e) { toast(e.message, 'error'); }
+  finally { hideSpinner(); _deleteTarget = null; }
+}
+
+/* ═══════════════════════════════════════════════════ ANALYZE ═══ */
+function populateAnalyzeSelect() {
+  if (!_candidates.length) {
+    api('GET', '/api/v1/candidates/?limit=200').then(data => {
+      _candidates = data;
+      fillSelect('analyze-candidate-select', data, c => `${c.name} (${c.email})`);
+    }).catch(() => {});
+  } else {
+    fillSelect('analyze-candidate-select', _candidates, c => `${c.name} (${c.email})`);
+  }
+}
+
+function fillSelect(id, items, labelFn) {
+  const sel = document.getElementById(id);
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select —</option>' +
+    items.map(i => `<option value="${i.id}">${labelFn(i)}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+
+function onAnalyzeSelect() {
+  const id = parseInt(document.getElementById('analyze-candidate-select').value);
+  const c = _candidates.find(x => x.id === id);
+  const btnRun = document.getElementById('btn-run-analysis');
+  const btnRe = document.getElementById('btn-reanalyze');
+  const preview = document.getElementById('analyze-preview');
+  if (c) {
+    btnRun.disabled = false;
+    btnRe.disabled = !c.ai_summary;
+    preview.style.display = 'block';
+    preview.textContent = c.resume_text ? c.resume_text.slice(0, 500) + (c.resume_text.length > 500 ? '…' : '') : 'No resume text.';
+  } else {
+    btnRun.disabled = true;
+    btnRe.disabled = true;
+    preview.style.display = 'none';
+    document.getElementById('analysis-result').style.display = 'none';
+  }
+}
+
+async function runAnalysis(forceReanalyze=false) {
+  const id = parseInt(document.getElementById('analyze-candidate-select').value);
+  if (!id) { toast('Select a candidate first', 'error'); return; }
+  try {
+    showSpinner('AI is reading the resume…');
+    const r = await api('POST', '/api/v1/candidates/analyze-resume', {candidate_id: id, force_reanalyze: forceReanalyze});
+    renderAnalysisResult(r);
+    // Update local cache
+    const idx = _candidates.findIndex(c => c.id === id);
+    if (idx >= 0) {
+      _candidates[idx].ai_summary = r.summary;
+      _candidates[idx].skills = r.extracted_skills.join(', ');
+      _candidates[idx].years_experience = r.experience_years;
+    }
+    document.getElementById('btn-reanalyze').disabled = false;
+    toast('Resume analyzed!', 'success');
+  } catch(e) { toast('Analysis failed: ' + e.message, 'error'); }
+  finally { hideSpinner(); }
+}
+
+function runReanalysis() { runAnalysis(true); }
+
+function renderAnalysisResult(r) {
+  document.getElementById('analysis-result').style.display = 'block';
+  // Hero
+  document.getElementById('ah-avatar').textContent = initials(r.candidate_name);
+  document.getElementById('ah-name').textContent = r.candidate_name;
+  document.getElementById('ah-meta').textContent =
+    `${r.experience_years || '?'} years experience · ${r.education_level || ''} · ${r.model_used}`;
+  document.getElementById('ah-score').textContent = Math.round(r.overall_score);
+  document.getElementById('ah-badge').innerHTML =
+    `<span class="tag tag-ai">${r.extracted_skills.slice(0,4).join(' · ')}</span>`;
+  // Summary
+  document.getElementById('analysis-summary').textContent = r.summary;
+  // Strengths
+  document.getElementById('analysis-strengths').innerHTML =
+    r.strengths.map(s => `<div style="font-size:.875rem;color:var(--green)">✅ ${s}</div>`).join('');
+  // Growth
+  document.getElementById('analysis-growth').innerHTML =
+    r.areas_for_improvement.map(s => `<div style="font-size:.875rem;color:var(--amber)">📈 ${s}</div>`).join('');
+  // Skills
+  document.getElementById('analysis-skills').innerHTML =
+    r.extracted_skills.map(s => `<span class="tag tag-blue">${s}</span>`).join('');
+}
+
+/* ════════════════════════════════════════════════════════ JOBS ═══ */
+async function loadJobs() {
+  try {
+    _jobs = await api('GET', '/api/v1/jobs/?active_only=false&limit=200');
+    renderJobs();
+    if (!_candidates.length) await loadCandidatesQuiet();
+  } catch(e) { toast('Failed to load jobs: ' + e.message, 'error'); }
+}
+
+async function loadCandidatesQuiet() {
+  try { _candidates = await api('GET', '/api/v1/candidates/?limit=200'); } catch {}
+}
+
+function renderJobs() {
+  const el = document.getElementById('jobs-grid');
+  const active = _jobs.filter(j => j.is_active);
+  const inactive = _jobs.filter(j => !j.is_active);
+  if (!_jobs.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">💼</div><h3>No jobs yet</h3><p>Add a job or generate one with AI</p></div>`;
+    return;
+  }
+  const renderCard = j => `
+    <div class="card" style="margin-bottom:12px;opacity:${j.is_active?1:.6}">
+      <div class="card-body">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span class="fw-600" style="font-size:.95rem">${j.title}</span>
+              ${j.ai_generated ? '<span class="ai-badge">✨ AI Generated</span>' : ''}
+              ${!j.is_active ? '<span class="tag tag-gray">Closed</span>' : '<span class="tag tag-green">Active</span>'}
+            </div>
+            <div style="font-size:.82rem;color:var(--ink-3);margin-bottom:8px">
+              ${j.company} ${j.location ? '· ' + j.location : ''} ${j.is_remote ? '· Remote' : ''} ${j.min_experience_years ? '· ' + j.min_experience_years + '+ yrs' : ''}
+            </div>
+            ${j.required_skills ? `<div class="tags">${j.required_skills.split(',').slice(0,5).map(s=>`<span class="tag tag-blue">${s.trim()}</span>`).join('')}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-secondary btn-sm" onclick="matchForJob(${j.id})">🎯 Match</button>
+            ${j.is_active ? `<button class="btn btn-danger btn-sm" onclick="promptDelete('job',${j.id},'${j.title.replace(/'/g,"\\'")}')">Deactivate</button>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  el.innerHTML = active.map(renderCard).join('') +
+    (inactive.length ? `<div style="margin-top:24px;margin-bottom:10px;font-size:.78rem;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em">Closed Positions</div>` + inactive.map(renderCard).join('') : '');
+}
+
+async function addJob() {
+  const title = document.getElementById('j-title').value.trim();
+  const company = document.getElementById('j-company').value.trim();
+  const desc = document.getElementById('j-desc').value.trim();
+  if (!title || !company || !desc) { toast('Title, company and description are required', 'error'); return; }
+  try {
+    showSpinner('Saving job…');
+    await api('POST', '/api/v1/jobs/', {
+      title, company,
+      description: desc,
+      required_skills: document.getElementById('j-skills').value.trim() || null,
+      min_experience_years: parseFloat(document.getElementById('j-exp').value) || null,
+      location: document.getElementById('j-location').value.trim() || null,
+      is_remote: document.getElementById('j-remote').checked
+    });
+    closeModal('modal-add-job');
+    toast('Job posted!', 'success');
+    ['j-title','j-company','j-skills','j-location','j-desc'].forEach(id => document.getElementById(id).value='');
+    loadJobs(); loadDashboard();
+  } catch(e) { toast(e.message, 'error'); }
+  finally { hideSpinner(); }
+}
+
+function matchForJob(id) {
+  navigate('match');
+  setTimeout(() => {
+    document.getElementById('rank-job-select').value = id;
+  }, 200);
+}
+
+/* ═════════════════════════════════════════════ GENERATE JD ═══ */
+async function generateJD() {
+  const title = document.getElementById('jd-title').value.trim();
+  const company = document.getElementById('jd-company').value.trim();
+  const skillsRaw = document.getElementById('jd-skills').value.trim();
+  if (!title || !company || !skillsRaw) { toast('Title, company and skills are required', 'error'); return; }
+  const skills = skillsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  try {
+    showSpinner('AI is writing your job description…');
+    const r = await api('POST', '/api/v1/jobs/generate-jd', {
+      job_title: title,
+      company_name: company,
+      required_skills: skills,
+      experience_years: parseInt(document.getElementById('jd-exp').value) || 3,
+      location: document.getElementById('jd-location').value.trim() || null,
+      is_remote: document.getElementById('jd-remote').checked,
+      extra_context: document.getElementById('jd-context').value.trim() || null,
+      save_to_db: document.getElementById('jd-save').checked
+    });
+    document.getElementById('jd-output').textContent = r.generated_description;
+    const panel = document.getElementById('jd-result-panel');
+    panel.style.display = 'block';
+    const note = document.getElementById('jd-saved-note');
+    if (r.job_posting_id) {
+      note.style.display = 'inline-flex';
+      document.getElementById('jd-saved-id').textContent = r.job_posting_id;
+      loadJobs(); loadDashboard();
+    } else { note.style.display = 'none'; }
+    toast('Job description generated!', 'success');
+  } catch(e) { toast('Generation failed: ' + e.message, 'error'); }
+  finally { hideSpinner(); }
+}
+
+function copyJD() {
+  navigator.clipboard.writeText(document.getElementById('jd-output').textContent);
+  toast('Copied to clipboard!', 'success');
+}
+
+function downloadJD() {
+  const title = document.getElementById('jd-title').value || 'job-description';
+  const text = document.getElementById('jd-output').textContent;
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.toLowerCase().replace(/\s+/g,'-') + '.txt';
+  a.click();
+}
+
+/* ══════════════════════════════════════════════════ MATCHING ═══ */
+function switchMatchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('match-tab-' + tab).classList.add('active');
+}
+
+function populateMatchSelects() {
+  const loadData = async () => {
+    if (!_candidates.length) _candidates = await api('GET', '/api/v1/candidates/?limit=200').catch(()=>[]);
+    if (!_jobs.length) _jobs = await api('GET', '/api/v1/jobs/?limit=200').catch(()=>[]);
+    const activeJobs = _jobs.filter(j=>j.is_active);
+    fillSelect('rank-job-select', activeJobs, j => j.title + ' — ' + j.company);
+    fillSelect('match-candidate-select', _candidates, c => c.name + ' (' + c.email + ')');
+    fillSelect('match-job-select', activeJobs, j => j.title + ' — ' + j.company);
+  };
+  loadData().catch(()=>{});
+}
+
+async function rankCandidates() {
+  const jobId = parseInt(document.getElementById('rank-job-select').value);
+  const topN = parseInt(document.getElementById('rank-top-n').value);
+  if (!jobId) { toast('Select a job first', 'error'); return; }
+  try {
+    showSpinner('AI is scoring all candidates…');
+    const results = await api('POST', '/api/v1/rank-candidates', {job_id: jobId, top_n: topN});
+    renderRankedResults(results, jobId);
+    toast(`Ranked ${results.length} candidates!`, 'success');
+  } catch(e) { toast('Ranking failed: ' + e.message, 'error'); }
+  finally { hideSpinner(); }
+}
+
+function renderRankedResults(results, jobId) {
+  const el = document.getElementById('rank-results');
+  if (!results.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><h3>No candidates with resumes found</h3><p>Add resume text to candidates first</p></div>`;
+    return;
+  }
+  const job = _jobs.find(j => j.id === jobId);
+  el.innerHTML = `
+    <div style="margin-bottom:14px;font-size:.875rem;color:var(--ink-3)">
+      Top ${results.length} candidates for <strong>${job ? job.title : 'this job'}</strong>
+    </div>
+    ${results.map(r => `
+      <div class="rank-card">
+        <div class="rank-num ${r.rank<=3 ? 'rank-'+r.rank : 'rank-other'}">#${r.rank}</div>
+        <div class="rank-info">
+          <div class="rank-name">${r.candidate_name}</div>
+          <div class="rank-email">${r.candidate_email}</div>
+          <div style="margin-top:6px;font-size:.8rem;color:var(--ink-3);line-height:1.5">${r.match_reasoning}</div>
+          ${r.missing_skills && r.missing_skills.length ?
+            `<div style="margin-top:6px"><span style="font-size:.75rem;color:var(--red)">Missing: </span>
+             ${r.missing_skills.map(s=>`<span class="tag tag-amber" style="font-size:.72rem">${s}</span>`).join(' ')}</div>` : ''}
+        </div>
+        <div style="text-align:center;flex-shrink:0">
+          <div style="font-size:1.6rem;font-weight:700;color:${r.match_score>=75?'var(--green)':r.match_score>=50?'var(--amber)':'var(--red)'}">${Math.round(r.match_score)}%</div>
+          <div style="font-size:.72rem;color:var(--ink-3)">match</div>
+          ${r.skills_score != null ? `<div style="font-size:.72rem;color:var(--ink-3);margin-top:4px">skills ${Math.round(r.skills_score)}%</div>` : ''}
+        </div>
+      </div>`).join('')}`;
+}
+
+async function matchOne() {
+  const cId = parseInt(document.getElementById('match-candidate-select').value);
+  const jId = parseInt(document.getElementById('match-job-select').value);
+  if (!cId || !jId) { toast('Select both a candidate and a job', 'error'); return; }
+  try {
+    showSpinner('AI is scoring this match…');
+    const r = await api('POST', '/api/v1/match', {candidate_id: cId, job_id: jId});
+    renderOneMatchResult(r);
+    toast('Match complete!', 'success');
+  } catch(e) { toast('Match failed: ' + e.message, 'error'); }
+  finally { hideSpinner(); }
+}
+
+function renderOneMatchResult(r) {
+  const el = document.getElementById('one-match-result');
+  const scoreColor = r.match_score>=75?'var(--green)':r.match_score>=50?'var(--amber)':'var(--red)';
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px">
+          <div>
+            <div style="font-size:1.2rem;font-weight:700">${r.candidate_name}</div>
+            <div style="font-size:.82rem;color:var(--ink-3)">for ${r.job_title}</div>
+          </div>
+          <div style="margin-left:auto;text-align:center">
+            <div style="font-size:2.2rem;font-weight:700;color:${scoreColor}">${Math.round(r.match_score)}%</div>
+            <div style="font-size:.75rem;color:var(--ink-3)">Overall Match</div>
+          </div>
+        </div>
+        <div class="grid-3" style="margin-bottom:16px">
+          ${[['Skills',r.skills_score],['Experience',r.experience_score],['Education',r.education_score]].map(([l,v])=> v!=null ? `
+          <div style="text-align:center;padding:12px;background:var(--paper);border-radius:8px">
+            <div style="font-size:1.3rem;font-weight:700;color:${v>=75?'var(--green)':v>=50?'var(--amber)':'var(--red)'}">${Math.round(v)}%</div>
+            <div style="font-size:.75rem;color:var(--ink-3)">${l} Score</div>
+          </div>` : '').join('')}
+        </div>
+        <div style="margin-bottom:14px;padding:14px;background:var(--paper);border-radius:8px;font-size:.875rem;line-height:1.7;color:var(--ink-2)">${r.match_reasoning}</div>
+        ${r.missing_skills && r.missing_skills.length ? `
+        <div>
+          <div style="font-size:.78rem;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Missing Skills</div>
+          <div class="tags">${r.missing_skills.map(s=>`<span class="tag tag-red">${s}</span>`).join('')}</div>
+        </div>` : `<div style="color:var(--green);font-size:.875rem;font-weight:500">✅ No critical skill gaps found</div>`}
+      </div>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════ SCREENING ═══ */
+function populateScreeningSelects() {
+  const load = async () => {
+    if (!_candidates.length) _candidates = await api('GET','/api/v1/candidates/?limit=200').catch(()=>[]);
+    if (!_jobs.length) _jobs = await api('GET','/api/v1/jobs/?limit=200').catch(()=>[]);
+    fillSelect('screen-candidate-select', _candidates, c => c.name + ' (' + c.email + ')');
+    fillSelect('screen-job-select', _jobs.filter(j=>j.is_active), j => j.title + ' — ' + j.company);
+  };
+  load().catch(()=>{});
+}
+
+async function generateScreening() {
+  const cId = parseInt(document.getElementById('screen-candidate-select').value);
+  const jId = parseInt(document.getElementById('screen-job-select').value);
+  const num = parseInt(document.getElementById('screen-num').value);
+  if (!cId || !jId) { toast('Select both a candidate and a job', 'error'); return; }
+  try {
+    showSpinner('AI is writing personalized questions…');
+    const r = await api('POST', '/api/v1/screening-questions', {candidate_id: cId, job_id: jId, num_questions: num});
+    // Render
+    document.getElementById('screening-result').style.display = 'block';
+    document.getElementById('screening-title').textContent = `Questions for ${r.candidate_name} → ${r.job_title}`;
+    document.getElementById('screening-focus-areas').innerHTML =
+      r.focus_areas.map(f=>`<span class="tag tag-ai">${f}</span>`).join(' ');
+    document.getElementById('screening-questions-list').innerHTML =
+      r.questions.map((q,i) => `<div class="question-item"><div class="question-num">${i+1}</div><div class="question-text">${q}</div></div>`).join('');
+    toast(`${r.questions.length} questions generated!`, 'success');
+  } catch(e) { toast('Generation failed: ' + e.message, 'error'); }
+  finally { hideSpinner(); }
+}
+
+function copyScreening() {
+  const questions = document.querySelectorAll('.question-text');
+  const text = Array.from(questions).map((q,i) => `${i+1}. ${q.textContent}`).join('\n\n');
+  navigator.clipboard.writeText(text);
+  toast('Questions copied!', 'success');
+}
+
+/* ═══════════════════════════════════════════════ ANALYTICS ═══ */
+async function loadAnalytics() {
+  try {
+    showSpinner('Loading analytics…');
+    const a = await api('GET', '/api/v1/analytics/summary');
+    document.getElementById('analytics-body').innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Candidates</div><div class="stat-value">${a.total_candidates}</div></div>
+        <div class="stat-card"><div class="stat-label">Job Postings</div><div class="stat-value">${a.total_jobs}</div></div>
+        <div class="stat-card ai"><div class="stat-label">AI Matches Run</div><div class="stat-value">${a.total_matches}</div></div>
+        <div class="stat-card ai"><div class="stat-label">Avg Match Score</div><div class="stat-value">${a.avg_match_score ? Math.round(a.avg_match_score)+'%' : '—'}</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">🔥 Most In-Demand Skills (from Jobs)</span></div>
+          <div class="card-body">
+            ${a.top_skills_in_demand.length
+              ? a.top_skills_in_demand.map((s,i)=>`
+                <div class="skill-row">
+                  <span class="skill-name">${s}</span>
+                  <div class="progress" style="flex:1"><div class="progress-bar" style="width:${Math.max(15,100-i*10)}%"></div></div>
+                  <span style="font-size:.75rem;color:var(--ink-3);width:25px;text-align:right">#${i+1}</span>
+                </div>`).join('')
+              : '<div class="text-muted">No job data yet</div>'}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">💡 Top Candidate Skills</span></div>
+          <div class="card-body">
+            ${a.top_candidate_skills.length
+              ? a.top_candidate_skills.map((s,i)=>`
+                <div class="skill-row">
+                  <span class="skill-name">${s}</span>
+                  <div class="progress" style="flex:1"><div class="progress-bar green" style="width:${Math.max(15,100-i*10)}%"></div></div>
+                  <span style="font-size:.75rem;color:var(--ink-3);width:25px;text-align:right">#${i+1}</span>
+                </div>`).join('')
+              : '<div class="text-muted">No candidate data yet</div>'}
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('analytics-body').innerHTML =
+      `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Could not load analytics</h3><p>Is the API running at ${API}?</p></div>`;
+  } finally { hideSpinner(); }
+}
+
+/* ════════════════════════════════════════════════ SETTINGS ═══ */
+function saveSettings() {
+  API = document.getElementById('setting-api-url').value.trim().replace(/\/$/, '');
+  localStorage.setItem('api_url', API);
+  const status = document.getElementById('settings-status');
+  status.textContent = 'Testing connection…';
+  status.style.color = 'var(--ink-3)';
+  fetch(API + '/')
+    .then(() => { status.textContent = '✅ Connected to API successfully!'; status.style.color = 'var(--green)'; checkAPI(); })
+    .catch(() => { status.textContent = '❌ Could not connect. Is the API running?'; status.style.color = 'var(--red)'; checkAPI(); });
+}
+</script>
+</body>
+</html>

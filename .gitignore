@@ -1,0 +1,25 @@
+.env
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+.pytest_cache/
+.vscode/
+.DS_Store
+Thumbs.db
+*.egg-info/
+dist/
+build/
+
+# Visual Studio cache & settings
+.vs/
+
+# Environment variables
+.env
+.env.local
+
+# Node modules (if applicable)
+node_modules/
+
+Git Token.txt
