@@ -59,8 +59,8 @@ def root():
         "name": settings.APP_NAME,
         "version": "1.0.0",
         "status": "running",
-        "ui": "http://localhost:8000/ui",
-        "api_docs": "http://localhost:8000/docs"
+        "ui": "/ui",
+        "api_docs": "/docs"
     }
 
 
