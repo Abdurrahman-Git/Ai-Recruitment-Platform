@@ -1,6 +1,6 @@
 # 🤖 AI Recruitment Intelligence Platform
 
-> An AI-powered recruitment assistant built with FastAPI, OpenAI GPT-4o, SQLAlchemy, and Pydantic. Automatically analyzes resumes, matches candidates to jobs, generates job descriptions, and ranks applicants — all via a REST API.
+> An AI-powered recruitment assistant built with FastAPI, OpenAI GPT-4o, SQLAlchemy, and Pydantic. Automatically analyzes resumes, matches candidates to jobs, generates job descriptions, and ranks applicants — all via a REST API..
 
 ---
 
